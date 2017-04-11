@@ -1,16 +1,23 @@
 <?php
-class SQLPgSQL extends SQLGlobal {
+class SQLPgSQL extends SQLGlobal
+{
+    /**
+     * @override
+     */
+    public $className = __CLASS__;
     /**
      * @param object $db
      */
-    public function __construct(&$db = null) {
+    public function __construct(&$db = null)
+    {
         parent::__construct($db);
     }
     /**
      * @todo
      * @override
      */
-    public function exist($table, $dbname = '') {
+    public function exist($table, $dbname = '')
+    {
         $this->_sql = array("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public' AND  table_name ='$table'");
 
         return $this;
@@ -19,7 +26,8 @@ class SQLPgSQL extends SQLGlobal {
      * @todo
      * @override
      */
-    protected function buildCreate() {
+    protected function buildCreate()
+    {
 
         $sqlAll = array();
         foreach ($this->table as $tableIndex => $table) {
@@ -87,13 +95,12 @@ class SQLPgSQL extends SQLGlobal {
             $sql[] = ');';
             $sql[] = 'CREATE INDEX ' . $table . '_ix_id on ' . $table . '(' . $idname . ');';
             $sqlAll[] = implode($sql, ' ');
-
         }
         $this->_sql = $sqlAll;
-
     }
 
-    protected function buildDrop() {
+    protected function buildDrop()
+    {
         foreach ($this->table as $tableIndex => $table) {
             $sql = array();
             $sql[] = 'DROP TABLE ' . $table . ';';
@@ -101,5 +108,4 @@ class SQLPgSQL extends SQLGlobal {
         }
         $this->_sql = $sql;
     }
-
 }

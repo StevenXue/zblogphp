@@ -12,25 +12,11 @@ ob_start();
 defined('ZBP_PATH') || define('ZBP_PATH', rtrim(str_replace('\\', '/', realpath(dirname(__FILE__) . '/../../')), '/') . '/');
 defined('ZBP_HOOKERROR') || define('ZBP_HOOKERROR', true);
 
-/**
- * 定义版本号
- * 因为版本号要经常改，所以往上面放
- */
-define('ZC_VERSION_MAJOR', '1');
-define('ZC_VERSION_MINOR', '5');
-define('ZC_VERSION_BUILD', '0');
-define('ZC_VERSION_COMMIT', '1525');
-define('ZC_VERSION_CODENAME', 'Subaru');
-define('ZC_VERSION', ZC_VERSION_MAJOR . '.' . ZC_VERSION_MINOR . '.' . ZC_VERSION_BUILD . '.' . ZC_VERSION_COMMIT);
-define('ZC_VERSION_DISPLAY', ZC_VERSION_MAJOR . '.' . ZC_VERSION_MINOR . ' ' . ZC_VERSION_CODENAME);
-define('ZC_VERSION_FULL', ZC_VERSION . ' (' . ZC_VERSION_CODENAME . ')');
-define('ZC_BLOG_VERSION', ZC_VERSION_DISPLAY); // 原变量名
-define('ZC_BLOG_COMMIT', ZC_VERSION_COMMIT); // 为写入系统配置统一风格
-$GLOBALS['blogversion'] = ZC_VERSION_MAJOR . ZC_VERSION_MINOR . ZC_VERSION_COMMIT;
 
 /**
  * 加载系统基础函数
  */
+require ZBP_PATH . 'zb_system/function/c_system_version.php';
 require ZBP_PATH . 'zb_system/function/c_system_plugin.php';
 require ZBP_PATH . 'zb_system/function/c_system_debug.php';
 require ZBP_PATH . 'zb_system/function/c_system_common.php';
@@ -59,6 +45,8 @@ define('SERVER_IIS', 2);
 define('SERVER_NGINX', 3);
 define('SERVER_LIGHTTPD', 4);
 define('SERVER_KANGLE', 5);
+define('SERVER_CADDY', 6);
+define('SERVER_BUILTIN', 7);
 /**
  * PHP引擎
  */
@@ -82,7 +70,9 @@ define('IS_APACHE', PHP_SERVER === SERVER_APACHE);
 define('IS_IIS', PHP_SERVER === SERVER_IIS);
 define('IS_NGINX', PHP_SERVER === SERVER_NGINX);
 define('IS_LIGHTTPD', PHP_SERVER === SERVER_LIGHTTPD);
-define('IS_KANGLE', PHP_SERVER === PHP_SERVER);
+define('IS_KANGLE', PHP_SERVER === SERVER_KANGLE);
+define('IS_CADDY', PHP_SERVER === SERVER_CADDY);
+define('IS_BUILTIN', PHP_SERVER === SERVER_BUILTIN);
 define('IS_HHVM', PHP_ENGINE === ENGINE_HHVM);
 
 /**
@@ -103,15 +93,15 @@ define('ZC_POST_TYPE_ALBUM', 8); // 相册
  * @param  id=>{name,url,template}
  */
 $GLOBALS['posttype'] = array(
-    array('article', '', ''),
-    array('page', '', ''),
-    array('tweet', '', ''),
-    array('discussion', '', ''),
-    array('link', '', ''),
-    array('music', '', ''),
-    array('video', '', ''),
-    array('photo', '', ''),
-    array('album', '', ''),
+    array('article', '', '', 0, 0),
+    array('page', '', '', null, null),
+    array('tweet', '', '', null, null),
+    array('discussion', '', '', null, null),
+    array('link', '', '', null, null),
+    array('music', '', '', null, null),
+    array('video', '', '', null, null),
+    array('photo', '', '', null, null),
+    array('album', '', '', null, null),
 );
 
 /**
@@ -192,9 +182,9 @@ $GLOBALS['actions'] = array(
     'UploadPst' => 3,
     'UploadDel' => 3,
 
-    'ModuleEdt' => 3,
-    'ModulePst' => 3,
-    'ModuleDel' => 3,
+    'ModuleEdt' => 1,
+    'ModulePst' => 1,
+    'ModuleDel' => 1,
 
     'ThemeSet' => 1,
     'SidebarSet' => 1,
@@ -271,8 +261,9 @@ $GLOBALS['datainfo'] = array(
     ),
     'Category' => array(
         'ID' => array('cate_ID', 'integer', '', 0),
-        'Name' => array('cate_Name', 'string', 50, ''),
+        'Name' => array('cate_Name', 'string', 250, ''),
         'Order' => array('cate_Order', 'integer', '', 0),
+        'Type' => array('cate_Type', 'integer', '', 0),
         'Count' => array('cate_Count', 'integer', '', 0),
         'Alias' => array('cate_Alias', 'string', 50, ''),
         'Intro' => array('cate_Intro', 'string', '', ''),
@@ -289,7 +280,7 @@ $GLOBALS['datainfo'] = array(
         'RootID' => array('comm_RootID', 'integer', '', 0),
         'ParentID' => array('comm_ParentID', 'integer', '', 0),
         'AuthorID' => array('comm_AuthorID', 'integer', '', 0),
-        'Name' => array('comm_Name', 'string', 20, ''),
+        'Name' => array('comm_Name', 'string', 50, ''),
         'Content' => array('comm_Content', 'string', '', ''),
         'Email' => array('comm_Email', 'string', 50, ''),
         'HomePage' => array('comm_HomePage', 'string', 250, ''),
@@ -300,7 +291,7 @@ $GLOBALS['datainfo'] = array(
     ),
     'Module' => array(
         'ID' => array('mod_ID', 'integer', '', 0),
-        'Name' => array('mod_Name', 'string', 100, ''),
+        'Name' => array('mod_Name', 'string', 250, ''),
         'FileName' => array('mod_FileName', 'string', 50, ''),
         'Content' => array('mod_Content', 'string', '', ''),
         'HtmlID' => array('mod_HtmlID', 'string', 50, ''),
@@ -334,6 +325,7 @@ $GLOBALS['datainfo'] = array(
         'ID' => array('tag_ID', 'integer', '', 0),
         'Name' => array('tag_Name', 'string', 250, ''),
         'Order' => array('tag_Order', 'integer', '', 0),
+        'Type' => array('tag_Type', 'integer', '', 0),
         'Count' => array('tag_Count', 'integer', '', 0),
         'Alias' => array('tag_Alias', 'string', 250, ''),
         'Intro' => array('tag_Intro', 'string', '', ''),
@@ -370,7 +362,8 @@ if (function_exists('memory_get_usage')) {
  * 版本兼容处理
  */
 if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
-    function _stripslashes(&$var) {
+    function _stripslashes(&$var)
+    {
         if (is_array($var)) {
             foreach ($var as $k => &$v) {
                 _stripslashes($v);
@@ -420,14 +413,12 @@ $GLOBALS['activeapps'] = &$GLOBALS['activedapps'];
  */
 $GLOBALS['option'] = require ZBP_PATH . 'zb_system/defend/option.php';
 $op_users = null;
-if (is_readable($file_base = $GLOBALS['usersdir'] . 'c_option.php')) {
+if (!ZBP_HOOKERROR && isset($_ENV['ZBP_USER_OPTION']) && is_readable($file_base = $_ENV['ZBP_USER_OPTION'])) {
     $op_users = require $file_base;
-    if (is_array($op_users)) {
-        foreach ($op_users as $opk => $opv) {
-            $GLOBALS['option'][$opk] = $opv;
-        }
-
-    }
+    $GLOBALS['option'] = array_merge($GLOBALS['option'], $op_users);
+} elseif (is_readable($file_base = $GLOBALS['usersdir'] . 'c_option.php')) {
+    $op_users = require $file_base;
+    $GLOBALS['option'] = array_merge($GLOBALS['option'], $op_users);
 }
 
 $GLOBALS['blogtitle'] = $GLOBALS['option']['ZC_BLOG_SUBNAME']; // 不是漏写！

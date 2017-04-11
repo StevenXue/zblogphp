@@ -6,7 +6,8 @@
  * @package Z-BlogPHP
  * @subpackage ClassLib/Network/Networkcurl 网络连接
  */
-class Networkcurl implements iNetwork {
+class Networkcurl implements iNetwork
+{
     private $readyState = 0; #状态
     private $responseBody = null; #返回的二进制
     private $responseStream = null; #返回的数据流
@@ -34,7 +35,8 @@ class Networkcurl implements iNetwork {
     /**
      * @ignore
      */
-    public function __construct() {
+    public function __construct()
+    {
         //$this->ch = curl_init();
     }
 
@@ -43,7 +45,8 @@ class Networkcurl implements iNetwork {
      * @param $value
      * @throws Exception
      */
-    public function __set($property_name, $value) {
+    public function __set($property_name, $value)
+    {
         throw new Exception($property_name . ' readonly');
     }
 
@@ -51,7 +54,8 @@ class Networkcurl implements iNetwork {
      * @param $property_name
      * @return mixed
      */
-    public function __get($property_name) {
+    public function __get($property_name)
+    {
         if (strtolower($property_name) == 'responsexml') {
             $w = new DOMDocument();
 
@@ -69,7 +73,6 @@ class Networkcurl implements iNetwork {
             } else {
                 return null;
             }
-
         } else {
             return $this->$property_name;
         }
@@ -78,14 +81,15 @@ class Networkcurl implements iNetwork {
     /**
      * 取消
      */
-    public function abort() {
-
+    public function abort()
+    {
     }
 
     /**
      * @return string
      */
-    public function getAllResponseHeaders() {
+    public function getAllResponseHeaders()
+    {
         return implode("\r\n", $this->responseHeader);
     }
 
@@ -94,7 +98,8 @@ class Networkcurl implements iNetwork {
      * @param $bstrHeader
      * @return string
      */
-    public function getResponseHeader($bstrHeader) {
+    public function getResponseHeader($bstrHeader)
+    {
         $name = strtolower($bstrHeader);
         foreach ($this->responseHeader as $w) {
             if (strtolower(substr($w, 0, strpos($w, ':'))) == $name) {
@@ -115,7 +120,8 @@ class Networkcurl implements iNetwork {
      * @return bool
      * @throws Exception
      */
-    public function open($bstrMethod, $bstrUrl, $varAsync = true, $bstrUser = '', $bstrPassword = '') {
+    public function open($bstrMethod, $bstrUrl, $varAsync = true, $bstrUser = '', $bstrPassword = '')
+    {
         //Async无用
         $this->reinit();
         $method = strtoupper($bstrMethod);
@@ -149,7 +155,8 @@ class Networkcurl implements iNetwork {
      * @param $sendTimeout
      * @param $receiveTimeout
      */
-    public function setTimeOuts($resolveTimeout, $connectTimeout, $sendTimeout, $receiveTimeout) {
+    public function setTimeOuts($resolveTimeout, $connectTimeout, $sendTimeout, $receiveTimeout)
+    {
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, $connectTimeout);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, $resolveTimeout);
     }
@@ -158,7 +165,8 @@ class Networkcurl implements iNetwork {
      * 发送数据
      * @param string $varBody
      */
-    public function send($varBody = '') {
+    public function send($varBody = '')
+    {
 
         $data = $varBody;
         if (is_array($data)) {
@@ -200,20 +208,23 @@ class Networkcurl implements iNetwork {
         $this->responseHeader = explode("\r\n", substr($result, 0, $header_size - 4));
         $this->responseText = substr($result, $header_size);
         curl_close($this->ch);
-        if (isset($this->responseHeader[0])) {
-            $this->statusText = $this->responseHeader[0];
-            $a = explode(' ', $this->statusText);
-            if (isset($a[0])) {
-                $this->responseVersion = $a[0];
-            }
 
-            if (isset($a[1])) {
-                $this->status = $a[1];
-            }
+        foreach ($this->responseHeader as $key => $value) {
+            if (strpos($value, 'HTTP/')===0) {
+                if (isset($this->responseHeader[$key])) {
+                    $this->statusText = $this->responseHeader[$key];
+                    $a = explode(' ', $this->statusText);
+                    if (isset($a[0])) {
+                        $this->responseVersion = $a[0];
+                    }
 
-            unset($this->responseHeader[0]);
+                    if (isset($a[1])) {
+                        $this->status = $a[1];
+                    }
+                    unset($this->responseHeader[$key]);
+                }
+            }
         }
-
     }
 
     /**
@@ -223,7 +234,8 @@ class Networkcurl implements iNetwork {
      * @param bool $append
      * @return bool
      */
-    public function setRequestHeader($bstrHeader, $bstrValue, $append = false) {
+    public function setRequestHeader($bstrHeader, $bstrValue, $append = false)
+    {
         if ($append == false) {
             $this->httpheader[$bstrHeader] = $bstrHeader . ': ' . $bstrValue;
         } else {
@@ -242,7 +254,8 @@ class Networkcurl implements iNetwork {
      * @param string $bstrItem 参数
      * @param mixed $bstrValue 值
      */
-    public function add_postdata($bstrItem, $bstrValue) {
+    public function add_postdata($bstrItem, $bstrValue)
+    {
         $this->postdata[$bstrItem] = $bstrValue;
     }
     /**
@@ -250,7 +263,8 @@ class Networkcurl implements iNetwork {
      * @param string $entity
      * @return mixed
      */
-    public function addBinary($name, $entity, $filename = null, $mime = '') {
+    public function addBinary($name, $entity, $filename = null, $mime = '')
+    {
         global $zbp;
         $this->__isBinary = true;
 
@@ -289,7 +303,6 @@ class Networkcurl implements iNetwork {
         $value .= ';filename=' . $filename;
 
         $this->postdata[$name] = $value;
-
     }
 
     /**
@@ -297,14 +310,16 @@ class Networkcurl implements iNetwork {
      * @param string $entity
      * @return mixed
      */
-    public function addText($name, $entity) {
+    public function addText($name, $entity)
+    {
         return $this->add_postdata($name, $entity);
     }
 
     /**
      * 重置
      */
-    private function reinit() {
+    private function reinit()
+    {
         global $zbp;
         $this->readyState = 0; #状态
         $this->responseBody = null; #返回的二进制
@@ -327,14 +342,15 @@ class Networkcurl implements iNetwork {
         $this->errno = 0;
 
         $this->ch = curl_init();
-        $this->setRequestHeader('User-Agent', 'Mozilla/5.0 (' . $zbp->cache->system_environment . ') Z-BlogPHP/' . ZC_VERSION);
+        $this->setRequestHeader('User-Agent', 'Mozilla/5.0 (' . $zbp->cache->system_environment . ') Z-BlogPHP/' . $GLOBALS['blogversion']);
         $this->setMaxRedirs(1);
     }
 
     /**
      * 启用Gzip
      */
-    public function enableGzip() {
+    public function enableGzip()
+    {
         if (extension_loaded('zlib')) {
             $this->isgzip = true;
         }
@@ -343,8 +359,8 @@ class Networkcurl implements iNetwork {
     /**
      * @param int $n
      */
-    public function setMaxRedirs($n = 0) {
+    public function setMaxRedirs($n = 0)
+    {
         $this->maxredirs = (int) $n;
     }
-
 }

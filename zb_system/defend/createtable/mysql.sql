@@ -24,8 +24,9 @@ CREATE TABLE IF NOT EXISTS %pre%post (
 
 CREATE TABLE IF NOT EXISTS %pre%category (
   cate_ID int(11) NOT NULL AUTO_INCREMENT,
-  cate_Name varchar(50) NOT NULL DEFAULT '',
+  cate_Name varchar(255) NOT NULL DEFAULT '',
   cate_Order int(11) NOT NULL DEFAULT '0',
+  cate_Type tinyint(4) NOT NULL DEFAULT '0',
   cate_Count int(11) NOT NULL DEFAULT '0',
   cate_Alias varchar(255) NOT NULL DEFAULT '',
   cate_Intro text NOT NULL,
@@ -46,7 +47,7 @@ CREATE TABLE IF NOT EXISTS %pre%comment (
   comm_RootID int(11) NOT NULL DEFAULT '0',
   comm_ParentID int(11) NOT NULL DEFAULT '0',
   comm_AuthorID int(11) NOT NULL DEFAULT '0',
-  comm_Name varchar(20) NOT NULL DEFAULT '',
+  comm_Name varchar(50) NOT NULL DEFAULT '',
   comm_Email varchar(50) NOT NULL DEFAULT '',
   comm_HomePage varchar(255) NOT NULL DEFAULT '',
   comm_Content text NOT NULL,
@@ -96,7 +97,7 @@ CREATE TABLE IF NOT EXISTS %pre%member (
 
 CREATE TABLE IF NOT EXISTS %pre%module (
   mod_ID int(11) NOT NULL AUTO_INCREMENT,
-  mod_Name varchar(100) NOT NULL DEFAULT '',
+  mod_Name varchar(255) NOT NULL DEFAULT '',
   mod_FileName varchar(50) NOT NULL DEFAULT '',
   mod_Content text NOT NULL,
   mod_SidebarID int(11) NOT NULL DEFAULT '0',
@@ -114,6 +115,7 @@ CREATE TABLE IF NOT EXISTS %pre%tag (
   tag_ID int(11) NOT NULL AUTO_INCREMENT,
   tag_Name varchar(255) NOT NULL DEFAULT '',
   tag_Order int(11) NOT NULL DEFAULT '0',
+  tag_Type tinyint(4) NOT NULL DEFAULT '0',
   tag_Count int(11) NOT NULL DEFAULT '0',
   tag_Alias varchar(255) NOT NULL DEFAULT '', 
   tag_Intro text NOT NULL,  

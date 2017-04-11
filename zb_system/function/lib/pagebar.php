@@ -5,7 +5,8 @@
  * @package Z-BlogPHP
  * @subpackage ClassLib/PageBar 类库
  */
-class PageBar {
+class PageBar
+{
 
     /**
      * @var int|null 内容总数
@@ -76,9 +77,11 @@ class PageBar {
      * @param $url
      * @param bool $makereplace
      */
-    public function __construct($url, $makereplace = true) {
+    public function __construct($url, $makereplace = true, $isindex = false)
+    {
         $this->UrlRule = new UrlRule($url);
         $this->UrlRule->MakeReplace = $makereplace;
+        $this->UrlRule->IsIndex = $isindex;
         $this->Buttons = &$this->buttons;
         $this->PrevButton = &$this->prevbutton;
         $this->NextButton = &$this->nextbutton;
@@ -88,7 +91,8 @@ class PageBar {
      * 构造分页条
      * @return null
      */
-    public function Make() {
+    public function Make()
+    {
         global $zbp;
         if ($this->PageCount == 0) {
             return null;
@@ -99,10 +103,14 @@ class PageBar {
         $this->PageLast = $this->PageAll;
 
         $this->PagePrevious = $this->PageNow - 1;
-        if ($this->PagePrevious < 1) {$this->PagePrevious = 1;}
+        if ($this->PagePrevious < 1) {
+            $this->PagePrevious = 1;
+        }
 
         $this->PageNext = $this->PageNow + 1;
-        if ($this->PageNext > $this->PageAll) {$this->PageNext = $this->PageAll;}
+        if ($this->PageNext > $this->PageAll) {
+            $this->PageNext = $this->PageAll;
+        }
 
         $this->UrlRule->Rules['{%page%}'] = $this->PageFirst;
         $this->buttons['‹‹'] = $this->UrlRule->Make();
@@ -117,10 +125,14 @@ class PageBar {
         if ($j + $this->PageBarCount > $this->PageAll) {
             $j = $this->PageAll - $this->PageBarCount + 1;
         }
-        if ($j < 1) {$j = 1;}
+        if ($j < 1) {
+            $j = 1;
+        }
 
         for ($i = $j; $i < $j + $this->PageBarCount; $i++) {
-            if ($i > $this->PageAll) {break;}
+            if ($i > $this->PageAll) {
+                break;
+            }
             $this->UrlRule->Rules['{%page%}'] = $i;
             $this->buttons[$i] = $this->UrlRule->Make();
         }
@@ -132,7 +144,5 @@ class PageBar {
 
         $this->UrlRule->Rules['{%page%}'] = $this->PageLast;
         $this->buttons['››'] = $this->UrlRule->Make();
-
     }
-
 }

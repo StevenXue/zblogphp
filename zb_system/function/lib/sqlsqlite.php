@@ -1,16 +1,23 @@
 <?php
-class SQLSQLite extends SQLGlobal {
+class SQLSQLite extends SQLGlobal
+{
+    /**
+     * @override
+     */
+    public $className = __CLASS__;
     /**
      * @param object $db
      */
-    public function __construct(&$db = null) {
+    public function __construct(&$db = null)
+    {
         parent::__construct($db);
     }
     /**
      * @todo
      * @override
      */
-    public function exist($table, $dbname = '') {
+    public function exist($table, $dbname = '')
+    {
         $this->_sql = array("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='$table'");
 
         return $this;
@@ -19,7 +26,8 @@ class SQLSQLite extends SQLGlobal {
      * @todo
      * @override
      */
-    protected function buildCreate() {
+    protected function buildCreate()
+    {
         $sqlAll = array();
         foreach ($this->table as $tableIndex => $table) {
             $sql = array();
@@ -71,9 +79,7 @@ class SQLSQLite extends SQLGlobal {
             $sql[] = 'CREATE UNIQUE INDEX ' . $table . '_' . $idname;
             $sql[] = ' on ' . $table . ' (' . $idname . ');';
             $sqlAll[] = implode($sql, ' ');
-
         }
         $this->_sql = $sqlAll;
     }
-
 }
